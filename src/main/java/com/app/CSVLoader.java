@@ -3,24 +3,21 @@ package com.app;
 import au.com.bytecode.opencsv.CSVReader;
 import com.app.entities.Division;
 import com.app.entities.Person;
-import com.app.entities.enums.Gender;
-import com.app.repository.IRepository;
+import ru.vsu.lab.entities.enums.Gender;
+import ru.vsu.lab.repository.IRepository;
 
 import java.io.FileReader;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Locale;
 
-import static com.app.entities.enums.Gender.FEMALE;
-import static com.app.entities.enums.Gender.MALE;
+import static ru.vsu.lab.entities.enums.Gender.FEMALE;
+import static ru.vsu.lab.entities.enums.Gender.MALE;
 
 public class CSVLoader {
 
-    private static ArrayList<Division> divisions = new ArrayList<>();
+    public static ArrayList<Division> divisions = new ArrayList<>();
 
     /**
      * Метод добавления значений из файла csv
@@ -47,32 +44,25 @@ public class CSVLoader {
                 String date = nextLine[3];
                 LocalDate birthdate = LocalDate.parse(date, formatter);
 
-                int countDivision = 0;
-                int idDivision = 0;
-                if (divisions.size() == 0) {
-                    divisions.add(new Division(countDivision, nextLine[4]));
-                    idDivision = countDivision;
-                    countDivision++;
-                }
-                for(int j = 0; j < divisions.size(); j++)
-                {
-                    if(nextLine[4].equals(divisions.get(j).name)){
-                        divisions.add(new Division(countDivision, nextLine[4]));
-                        idDivision = countDivision;
-                        countDivision++;
-                    } else {
-                        idDivision = j;
+                int idDivision = -1;
+                boolean divisionExist = false;
+                for (Division value : divisions) {
+                    if (nextLine[4].equals(value.name)) {
+                        idDivision = value.id;
+                        divisionExist = true;
+                        break;
                     }
+                }
+                if (!divisionExist){
+                    divisions.add(new Division(nextLine[4]));
+                    idDivision = divisions.size() - 1;
                 }
 
                 BigDecimal salary = BigDecimal.valueOf(Long.parseLong(nextLine[5]));
 
-                repository.add(new Person(id, firstName, lastName, birthdate, gender, divisions.get(idDivision),
+                repository.add(new Person(id, firstName, lastName, birthdate, gender, new Division(nextLine[4]),
                         salary));
-                i++;
             }
-            if (i == 10)
-                break;
         }
     }
 }

@@ -1,41 +1,46 @@
 package com.app.repository;
 
-import com.app.Sorting;
-import com.app.entities.IPerson;
+import com.app.InjectorException;
 import com.app.entities.Person;
+import com.app.injector.ILabInjector;
+import com.app.injector.LabInjector;
+import com.app.sorter.ISorter;
+import ru.vsu.lab.entities.IPerson;
+import ru.vsu.lab.repository.IRepository;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Predicate;
-import java.io.FileReader;
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Класс списка персон
  * @autor Григорьев Владимир
  * @version 1
  */
-public class Repository<T> implements IRepository {
+public class Repository<T> implements IRepository<T> {
 
     /** Поле количества начальных пустых элементов массива */
     private final int INIT_SIZE = 10;
 
     /** Поле массива данных */
-    private IPerson[] array = new IPerson[INIT_SIZE];
+    private Object[] array = new Object[INIT_SIZE];
 
     /** Поле указатель */
     private int pointer = 0;
+
+    /** Поле сортровки*/
+    @ILabInjector
+    private ISorter mysorting;
+
+    public Repository() throws InjectorException {
+        (new LabInjector()).inject(this);
+    }
 
     /**
      * Функция добавляющая новый элемент в список. При достижении размера внутреннего
      * массива происходит его увеличение на один
      * @param item - элемент для добавления
      */
-    public void add(IPerson item) {
+    public void add(T item) {
         if(pointer == array.length)
             resize(array.length+1);
         array[pointer++] = item;
@@ -46,17 +51,18 @@ public class Repository<T> implements IRepository {
      * @param index - индекс элемента
      * @return возвращает элемент списка
      */
-    public IPerson get(int index) {
-        return array[index];
+    public T get(int index) {
+        return (T) array[index];
     }
 
     /**
      * Процедура определения персоны
-     * @param index
-     * @param person
+     * @param index -
+     * @param person -
      */
-    public void set(int index, IPerson person) {
+    public T set(int index, T person) {
         array[index] = person;
+        return (T) array[index];
     }
 
     /**
@@ -64,7 +70,7 @@ public class Repository<T> implements IRepository {
      * @param index - индекс
      * @param person - персона
      */
-    public void add(int index, IPerson person) {
+    public void add(int index, T person) {
         array[index] = person;
     }
 
@@ -73,12 +79,13 @@ public class Repository<T> implements IRepository {
      * перемещаются на шаг налево.
      * @param index - индекс удаляемого элемента
      */
-    public void delete(int index) {
+    public T delete(int index) {
         if (pointer - index >= 0) System.arraycopy(array, index + 1, array, index, pointer - index);
         array[pointer] = null;
         pointer--;
         if (array.length > INIT_SIZE)
             resize(array.length-1);
+        return (T) array[index];
     }
 
     /**
@@ -110,22 +117,26 @@ public class Repository<T> implements IRepository {
         return list;
     }
 
-    public List<IPerson> toList()
+    public List<T> toList()
     {
-        return Arrays.asList(array);
+        return Arrays.asList((T) array);
+    }
+
+    public List<Person> toPersonList()
+    {
+        ArrayList<Person> list = new ArrayList<Person>();
+        for (Object o : array) {
+            list.add((Person) o);
+        }
+        return list;
     }
 
     /**
      * Функция сортировки коллекции
      * @param comparator - сравниватель
      */
-    public void sortBy(Comparator<IPerson> comparator ){
-        if(array.length < 50){
-            Sorting.shellSort(array, comparator);
-        }
-        else {
-            Sorting.quickSort(array, 0, array.length - 1, comparator);
-        }
+    public void sortBy(Comparator<T> comparator ){
+        mysorting.sort(array, comparator);
     }
 
     /**
@@ -133,12 +144,30 @@ public class Repository<T> implements IRepository {
      * @param predicate - предикат
      * @return коллекцию персон
      */
-    public IRepository searchBy(Predicate<IPerson> predicate) {
-        IRepository res = new Repository<IPerson>();
-        for (int index = 0; index < array.length; index++) {
-            if (predicate.test(array[index]))
-                res.add(array[index]);
+    public IRepository searchBy(Predicate<T> predicate) {
+        IRepository res = null;
+        try {
+            res = new Repository<IPerson>();
+        } catch (InjectorException e) {
+            e.printStackTrace();
+        }
+        for (Object o : array) {
+            if (predicate.test((T) o))
+                res.add(o);
         }
         return res;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Repository<?> that = (Repository<?>) o;
+        return Arrays.equals(array, that.array);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(array);
     }
 }

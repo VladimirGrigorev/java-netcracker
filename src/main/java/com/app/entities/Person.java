@@ -1,13 +1,14 @@
 package com.app.entities;
 
-import com.app.entities.enums.Gender;
+import ru.vsu.lab.entities.IDivision;
+import ru.vsu.lab.entities.IPerson;
+import ru.vsu.lab.entities.enums.Gender;
+
 import java.time.LocalDate;
 
 import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
-import static com.app.entities.enums.Gender.FEMALE;
-import static com.app.entities.enums.Gender.MALE;
 import static java.time.temporal.ChronoUnit.YEARS;
 
 /**
@@ -40,13 +41,13 @@ public class Person implements IPerson {
 
     /**
      * Конструктор персоны
-     * @param id
-     * @param firstName
-     * @param lastName
-     * @param birthdate
-     * @param gender
-     * @param division
-     * @param salary
+     * @param id -
+     * @param firstName -
+     * @param lastName -
+     * @param birthdate -
+     * @param gender -
+     * @param division -
+     * @param salary -
      */
     public Person(Integer id, String firstName, String lastName, LocalDate birthdate, Gender gender,
                   IDivision division, BigDecimal salary) {
@@ -58,6 +59,13 @@ public class Person implements IPerson {
         this.division = division;
         this.salary = salary;
     }
+
+    /**
+     * Пустой конструктор персоны
+     */
+    public Person() {
+    }
+
 
     /**
      * Функция получения значения кода {@link Person#id}
@@ -210,5 +218,24 @@ public class Person implements IPerson {
                 ", division=" + division +
                 ", salary=" + salary +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return Objects.equals(id, person.id) &&
+                Objects.equals(firstName, person.firstName) &&
+                Objects.equals(lastName, person.lastName) &&
+                Objects.equals(birthdate, person.birthdate) &&
+                gender == person.gender &&
+                Objects.equals(division, person.division) &&
+                Objects.equals(salary, person.salary);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, birthdate, gender, division, salary);
     }
 }

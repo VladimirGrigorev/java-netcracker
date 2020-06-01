@@ -2,17 +2,21 @@ package com.app;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
 import com.app.entities.Division;
-import com.app.entities.IPerson;
 import com.app.entities.Person;
 import java.time.LocalDate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.app.repository.Repository;
+import ru.vsu.lab.entities.IPerson;
 
-import static com.app.entities.enums.Gender.MALE;
+import static ru.vsu.lab.entities.enums.Gender.MALE;
 
 /**
  * Класс представления меню.
@@ -24,7 +28,10 @@ public class MainView {
     /** Поле сканер */
     private Scanner in = new Scanner(System.in);
     /** Поле список персон */
-    private Repository<Person> personList = new Repository<Person>();
+    private Repository<IPerson> personList = new Repository<IPerson>();
+
+    public MainView() throws InjectorException {
+    }
 
     /** Функция показа меню */
     public void show() {
@@ -103,7 +110,7 @@ public class MainView {
                 case 5:
                     Comparator<IPerson> comparator = new Comparator<IPerson>(){
                         public int compare(IPerson o1, IPerson o2) {
-                            return (int)(o1.getId() - o2.getId());
+                            return o1.getFirstName().compareTo(o2.getFirstName());
                         }
                     };
 
@@ -126,7 +133,8 @@ public class MainView {
                     }
                     break;
                 case 7:
-                    System.exit(0);
+                    System.out.println(StreamRequest.firstRequest(personList).toString());
+                    System.out.println(StreamRequest.fourthRequest(personList).toString());
             }
         }
     }
