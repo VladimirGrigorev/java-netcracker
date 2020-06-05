@@ -11,11 +11,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import static ru.vsu.lab.entities.enums.Gender.FEMALE;
 import static ru.vsu.lab.entities.enums.Gender.MALE;
 
 public class CSVLoader {
+
+    /** Логгер */
+    private static Logger log = Logger.getLogger(CSVLoader.class.getName());
 
     public static ArrayList<Division> divisions = new ArrayList<>();
 
@@ -64,5 +68,7 @@ public class CSVLoader {
                         salary));
             }
         }
+
+        log.info("Repository was loaded from CSV file.");
     }
 }

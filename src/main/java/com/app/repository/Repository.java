@@ -10,6 +10,8 @@ import ru.vsu.lab.repository.IRepository;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Класс списка персон
@@ -17,6 +19,9 @@ import java.util.function.Predicate;
  * @version 1
  */
 public class Repository<T> implements IRepository<T> {
+
+    /** Логгер */
+    private static Logger log = Logger.getLogger(Repository.class.getName());
 
     /** Поле количества начальных пустых элементов массива */
     private final int INIT_SIZE = 10;
@@ -44,6 +49,7 @@ public class Repository<T> implements IRepository<T> {
         if(pointer == array.length)
             resize(array.length+1);
         array[pointer++] = item;
+        log.info("Person added to repository.");
     }
 
     /**
@@ -52,6 +58,7 @@ public class Repository<T> implements IRepository<T> {
      * @return возвращает элемент списка
      */
     public T get(int index) {
+        log.info("The person was got");
         return (T) array[index];
     }
 
@@ -62,6 +69,7 @@ public class Repository<T> implements IRepository<T> {
      */
     public T set(int index, T person) {
         array[index] = person;
+        log.info("The person was set");
         return (T) array[index];
     }
 
@@ -72,6 +80,7 @@ public class Repository<T> implements IRepository<T> {
      */
     public void add(int index, T person) {
         array[index] = person;
+        log.info("Person added to repository.");
     }
 
     /**
@@ -85,6 +94,7 @@ public class Repository<T> implements IRepository<T> {
         pointer--;
         if (array.length > INIT_SIZE)
             resize(array.length-1);
+        log.log(Level.INFO,"The person {} was deleted", index);
         return (T) array[index];
     }
 
@@ -114,11 +124,13 @@ public class Repository<T> implements IRepository<T> {
         String[] list = new String[pointer];
         for(int i=0; i<pointer; i++)
             list[i] = array[i].toString();
+        log.info("The persons were returned");
         return list;
     }
 
     public List<T> toList()
     {
+        log.info("The persons were returned");
         return Arrays.asList((T) array);
     }
 
@@ -128,6 +140,7 @@ public class Repository<T> implements IRepository<T> {
         for (Object o : array) {
             list.add((Person) o);
         }
+        log.info("The persons were returned");
         return list;
     }
 
@@ -137,6 +150,7 @@ public class Repository<T> implements IRepository<T> {
      */
     public void sortBy(Comparator<T> comparator ){
         mysorting.sort(array, comparator);
+        log.info("The persons were sorted");
     }
 
     /**
@@ -155,6 +169,7 @@ public class Repository<T> implements IRepository<T> {
             if (predicate.test((T) o))
                 res.add(o);
         }
+        log.info("The person was find");
         return res;
     }
 
