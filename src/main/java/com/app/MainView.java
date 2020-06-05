@@ -2,16 +2,12 @@ package com.app;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
 import com.app.entities.Division;
 import com.app.entities.Person;
 import java.time.LocalDate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.app.repository.Repository;
 import ru.vsu.lab.entities.IPerson;
@@ -19,11 +15,11 @@ import ru.vsu.lab.entities.IPerson;
 import static ru.vsu.lab.entities.enums.Gender.MALE;
 
 /**
- * Класс представления меню.
- * @autor Григорьев Владимир
- * @version 1
+ * Класс представления меню
  */
 public class MainView {
+
+    private static final String PATH = "src/main/resources/persons.csv";
 
     /** Поле сканер */
     private Scanner in = new Scanner(System.in);
@@ -61,7 +57,7 @@ public class MainView {
             switch (menuitem) {
                 case 1:
                     try {
-                        CSVLoader.addFromFileCSV(personList ,"C:\\persons.csv");
+                        CSVLoader loader = new CSVLoader(personList, PATH);
                     } catch (Exception e){
                         e.getStackTrace();
                     }

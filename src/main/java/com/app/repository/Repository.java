@@ -5,9 +5,16 @@ import com.app.entities.Person;
 import com.app.injector.ILabInjector;
 import com.app.injector.LabInjector;
 import com.app.sorter.ISorter;
+import com.app.sorter.QuickSort;
 import ru.vsu.lab.entities.IPerson;
 import ru.vsu.lab.repository.IRepository;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -15,9 +22,10 @@ import java.util.logging.Logger;
 
 /**
  * Класс списка персон
- * @autor Григорьев Владимир
- * @version 1
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlJavaTypeAdapter(Repository.Adapter.class)
 public class Repository<T> implements IRepository<T> {
 
     /** Логгер */
@@ -27,17 +35,25 @@ public class Repository<T> implements IRepository<T> {
     private final int INIT_SIZE = 10;
 
     /** Поле массива данных */
-    private Object[] array = new Object[INIT_SIZE];
+    @XmlElement(name = "array")
+    private T[] array = (T[]) new Object[10];
 
     /** Поле указатель */
     private int pointer = 0;
 
     /** Поле сортровки*/
     @ILabInjector
+    @XmlElement
+    @XmlJavaTypeAdapter(QuickSort.Adapter.class)
     private ISorter mysorting;
 
     public Repository() throws InjectorException {
         (new LabInjector()).inject(this);
+    }
+
+    public static class Adapter extends XmlAdapter<Repository, IRepository> {
+        public IRepository unmarshal(Repository r) { return r; }
+        public Repository marshal(IRepository r) { return (Repository) r; }
     }
 
     /**
@@ -113,7 +129,7 @@ public class Repository<T> implements IRepository<T> {
     private void resize(int newLength) {
         Person[] newArray = new Person[newLength];
         System.arraycopy(array, 0, newArray, 0, pointer);
-        array = newArray;
+        array = (T[]) newArray;
     }
 
     /**

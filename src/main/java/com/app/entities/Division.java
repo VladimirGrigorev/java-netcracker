@@ -2,8 +2,14 @@ package com.app.entities;
 
 import ru.vsu.lab.entities.IDivision;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Objects;
 
+@XmlRootElement(name = "division")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Division implements IDivision {
 
     public Integer id;
@@ -33,6 +39,11 @@ public class Division implements IDivision {
      * Пустой конструктор подразделения
      */
     public Division() {
+    }
+
+    public static class Adapter extends XmlAdapter<Division, IDivision> {
+        public IDivision unmarshal(Division v) { return v; }
+        public Division marshal(IDivision v) { return (Division) v; }
     }
 
     @Override

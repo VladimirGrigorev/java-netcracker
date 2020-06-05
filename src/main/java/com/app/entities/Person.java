@@ -4,6 +4,12 @@ import ru.vsu.lab.entities.IDivision;
 import ru.vsu.lab.entities.IPerson;
 import ru.vsu.lab.entities.enums.Gender;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDate;
 
 import java.math.BigDecimal;
@@ -13,9 +19,9 @@ import static java.time.temporal.ChronoUnit.YEARS;
 
 /**
  * Класс персоны
- * @autor Григорьев Владимир
- * @version 1
  */
+@XmlRootElement(name = "person")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Person implements IPerson {
 
     /** Поле код */
@@ -28,12 +34,15 @@ public class Person implements IPerson {
     private String lastName;
 
     /** Поле дата рождения */
+    @XmlJavaTypeAdapter(DateAdapter.class)
     private LocalDate birthdate;
 
     /** Поле пол */
     private Gender gender;
 
     /** Поле подразделение */
+    @XmlElement
+    @XmlJavaTypeAdapter(Division.Adapter.class)
     private IDivision division;
 
     /** Поле зарплата */
@@ -41,13 +50,13 @@ public class Person implements IPerson {
 
     /**
      * Конструктор персоны
-     * @param id -
-     * @param firstName -
-     * @param lastName -
-     * @param birthdate -
-     * @param gender -
-     * @param division -
-     * @param salary -
+     * @param id - Идентификационный номер
+     * @param firstName - Имя
+     * @param lastName - Фамилия
+     * @param birthdate - Дата рождения
+     * @param gender - Пол
+     * @param division - Отдел
+     * @param salary - Заработная плата
      */
     public Person(Integer id, String firstName, String lastName, LocalDate birthdate, Gender gender,
                   IDivision division, BigDecimal salary) {
@@ -66,6 +75,34 @@ public class Person implements IPerson {
     public Person() {
     }
 
+    /**
+     * Второй вариант для считывания из файла.
+     * @param firstName Имя
+     * @param personId Идентификационный номер
+     * @param birthDate Дата рождения
+     * @param gender Пол
+     * @param division Отдел
+     * @param salary Заработная плата
+     */
+    public Person(String firstName, int personId, LocalDate birthDate,
+                  Gender gender, IDivision division, BigDecimal salary) {
+        this.firstName = firstName;
+        this.birthdate = birthDate;
+        this.id = personId;
+        this.division = division;
+        this.gender = gender;
+        this.salary = salary;
+    }
+
+    public static class Adapter extends XmlAdapter<Person,IPerson> {
+        public IPerson unmarshal(Person v) { return v; }
+        public Person marshal(IPerson v) { return (Person) v; }
+    }
+
+    public static class DateAdapter extends XmlAdapter<String,LocalDate> {
+        public LocalDate unmarshal(String v) { return LocalDate.parse(v); }
+        public String marshal(LocalDate v) { return v.toString(); }
+    }
 
     /**
      * Функция получения значения кода {@link Person#id}

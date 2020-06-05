@@ -1,72 +1,136 @@
 package com.app;
 
-import au.com.bytecode.opencsv.CSVReader;
 import com.app.entities.Division;
 import com.app.entities.Person;
+
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import ru.vsu.lab.entities.IDivision;
+import ru.vsu.lab.entities.IPerson;
 import ru.vsu.lab.entities.enums.Gender;
 import ru.vsu.lab.repository.IRepository;
 
-import java.io.FileReader;
+import java.io.Reader;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
-import static ru.vsu.lab.entities.enums.Gender.FEMALE;
-import static ru.vsu.lab.entities.enums.Gender.MALE;
-
+/**
+ * Класс, реализующий считывание из файла информации.
+ * А также записывающий её в репозиторий.
+ */
 public class CSVLoader {
 
-    /** Логгер */
     private static Logger log = Logger.getLogger(CSVLoader.class.getName());
 
-    public static ArrayList<Division> divisions = new ArrayList<>();
+    /** Директория файла. */
+    private String path;
+
+    /** Репозиторий для записи информации из файла. */
+    private IRepository<IPerson> repository;
 
     /**
-     * Метод добавления значений из файла csv
-     * @param path - путь к файлу
-     * @throws Exception
+     * Метод доступа ко всем отделам из файла.
+     * @return отделы из файла.
      */
-    public static void addFromFileCSV(IRepository repository, String path) throws Exception {
-        CSVReader reader = new CSVReader(new FileReader(path), ';' , '"' , 1);
-        String[] nextLine;
-        int i = 0;
-        while ((nextLine = reader.readNext()) != null) {
-            if (nextLine != null) {
+    public HashSet<IDivision> getDivisions() {
+        return divisions;
+    }
 
-                Integer id = Integer.parseInt(nextLine[0]);
-                String firstName = nextLine[1];
-                String lastName = "empty";
-                Gender gender;
-                if(nextLine[2].equals("Male")){
-                    gender = MALE;
-                } else {
-                    gender = FEMALE;
+    /**
+     * HashSet, хранящий информацию об отделах.
+     * Необходим для оптимизации.
+     */
+    private HashSet<IDivision> divisions;
+
+    /**
+     * Конструктор класса.
+     * @param repository репозиторий для записи информации из файла.
+     * @param path директория файла.
+     */
+    public CSVLoader(IRepository<IPerson> repository, String path) {
+        this.repository = repository;
+        divisions = new HashSet<>();
+        this.path = path;
+        load();
+    }
+
+    /**
+     * Метод доступа к репозиторию.
+     * @return заполненный репозиторий.
+     */
+    public IRepository<IPerson> getRepository() {
+        return repository;
+    }
+
+    /**
+     * Проверка вхождения значения по имени.
+     * @param name название отдела.
+     * @return имеется ли такой отдел?
+     */
+    private boolean hasDivision(String name) {
+        for (IDivision division : divisions) {
+            if (division.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Данная функция считывает из файла информацию.
+     * А также записывает её в репозиторий.
+     */
+    private void load() {
+        try {
+            Reader reader = Files.newBufferedReader(Paths.get(path));
+            CSVReader csvReader = new CSVReaderBuilder(reader)
+                    .build();
+
+            while (csvReader.iterator().hasNext()) {
+                StringBuilder buf = new StringBuilder("");
+                if (csvReader.peek() == null) {
+                    break;
                 }
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.MM.yyyy");
-                String date = nextLine[3];
-                LocalDate birthdate = LocalDate.parse(date, formatter);
+                String[] line = csvReader.peek();
 
-                int idDivision = -1;
-                boolean divisionExist = false;
-                for (Division value : divisions) {
-                    if (nextLine[4].equals(value.name)) {
-                        idDivision = value.id;
-                        divisionExist = true;
+                for (String s : line) {
+                    buf.append(s);
+                }
+
+                line = buf.toString().split(";");
+
+                DateTimeFormatter formatter =
+                        DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+                if (!hasDivision(line[4])) {
+                    divisions.add(new Division(line[4]));
+                }
+                IDivision division = null;
+                for (IDivision iDivision : divisions) {
+                    if (iDivision.getName().equals(line[4])) {
+                        division = iDivision;
                         break;
                     }
                 }
-                if (!divisionExist){
-                    divisions.add(new Division(nextLine[4]));
-                    idDivision = divisions.size() - 1;
-                }
-
-                BigDecimal salary = BigDecimal.valueOf(Long.parseLong(nextLine[5]));
-
-                repository.add(new Person(id, firstName, lastName, birthdate, gender, new Division(nextLine[4]),
-                        salary));
+                Person person = new Person(line[1],
+                        Integer.parseInt(line[0]),
+                        LocalDate.parse(line[3], formatter),
+                        Gender.valueOf(line[2].toUpperCase()),
+                        division,
+                        BigDecimal.valueOf(Double.parseDouble(line[5])));
+                repository.add(person);
             }
+
+            reader.close();
+            csvReader.close();
+        } catch (Exception ex) {
+            log.warning("Impossible to read CSV file!");
+            ex.printStackTrace();
         }
 
         log.info("Repository was loaded from CSV file.");
