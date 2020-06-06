@@ -1,6 +1,6 @@
 package com.app.repository;
 
-import com.app.InjectorException;
+import com.app.exseption.InjectorException;
 import com.app.entities.Person;
 import com.app.injector.ILabInjector;
 import com.app.injector.LabInjector;
@@ -74,7 +74,7 @@ public class Repository<T> implements IRepository<T> {
      * @return возвращает элемент списка
      */
     public T get(int index) {
-        log.info("The person was got");
+        log.info("Get person by id");
         return (T) array[index];
     }
 

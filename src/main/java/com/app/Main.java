@@ -12,7 +12,7 @@ public class Main {
     private static final String XML_PATH = "src/main/resources/repository.xml";
 
     /** Точка входа в приложение */
-    public static void main(String[] args) throws InjectorException {
+    public static void main(String[] args) {
         LabFactory factory = new LabFactory();
         CSVLoader loader = new CSVLoader(factory.createRepository(IPerson.class), PATH);
 

@@ -1,6 +1,6 @@
 package com.app.factory;
 
-import com.app.InjectorException;
+import com.app.exseption.InjectorException;
 import com.app.entities.Division;
 import com.app.entities.Person;
 import com.app.injector.LabInjector;

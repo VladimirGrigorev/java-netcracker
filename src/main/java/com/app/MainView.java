@@ -9,6 +9,7 @@ import com.app.entities.Division;
 import com.app.entities.Person;
 import java.time.LocalDate;
 
+import com.app.exseption.InjectorException;
 import com.app.repository.Repository;
 import ru.vsu.lab.entities.IPerson;
 

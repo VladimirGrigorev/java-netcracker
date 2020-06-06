@@ -1,6 +1,6 @@
 package com.app.injector;
 
-import com.app.InjectorException;
+import com.app.exseption.InjectorException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
